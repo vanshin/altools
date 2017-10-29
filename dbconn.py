@@ -2,28 +2,59 @@
 
 '''db connection class'''
 
-import pymyql
+import pymysql
+import logging
+import queue
+log = logging.getLogger()
+
+from tools import Pool
 
 __pool = None
 
-def create_pool(**kw):
-    '''create dbpool'''
-    log.info('creating dbpool')
+def init_pool(dbsconf):
     global __pool
-    __pool = pymysql.connect(
-        host = kw.get('host', '127.0.0.1'),
-        port = kw.get('post', 3306),
-        user = kw.get('user'),
-        password = kw.get('password'),
-        db = kw.get('db'),
-        charset = kw.get('charset', 'utf8'),
-        autocommit = kw.get('autocommit', True),
-        # maxsize = kw.get('maxsize', 10),
-        # minsize = kw.get('minsize', 1),
-    )
+    if __pool:
+        log.warn('dbpool is existed')
+        return __pool
+    __pool = DBPool(dbsconf)
+    return __pool
 
-class DBConn(object):
+class DBPool(object):
+
+    def __init__(self, dbconfs):
+
+        global __pool
+        __pool = {}
+
+        self.dbconfs = dbconfs
+        for k,v in dbconfs.items():
+            max_size = v.get('max_size', 10)
+            pool = Pool(max_size)
+            print(max_size)
+            for i in range(max_size):
+                conn = DBConn(v)
+                pool.put(conn)
+            __pool[k] = pool
+
+
+class DBConnBase(object):
+    def __init__(self):
+        pass
+
+class DBConn(DBConnBase):
     '''dbconn class'''
 
-    def __init__(self, ):
-        self.dbconf =
+    def __init__(self, dbconf):
+        self.dbconf = dbconf
+        self.conn = pymysql.connect(
+            host = dbconf.get('host', '127.0.0.1'),
+            port = dbconf.get('post', 3306),
+            user = dbconf.get('user'),
+            password = dbconf.get('password'),
+            db = dbconf.get('db'),
+            charset = dbconf.get('charset', 'utf8'),
+            autocommit = dbconf.get('autocommit', True),
+            )
+
+    def get_conn(self):
+        pass
