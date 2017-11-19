@@ -14,12 +14,13 @@ from field import *
 
 class DBSession(object):
     def __init__(self, pool, name):
-        self.conn= pool.get(name)
+        self.conn = pool.get(name).get()
+        self.cursor = self.conn.conn.cursor()
 
     def db_log(self, info):
         '''print sql log'''
         sql_template = '{time}:|{info}:'
-        log.info(sql_template.format(format_ct(), info))
+        # log.info(sql_template.format(format_ct(), info))
 
     def make_args(self, number):
         '''make args string'''
@@ -35,13 +36,13 @@ class DBSession(object):
         res = None
         ret = []
 
-        self.conn.execute(sql.replace('?', '%s'), args or ())
+        self.cursor.execute(sql.replace('?', '%s'), args or ())
         if size:
-            res = self.conn.fetchmany(size)
+            res = self.cursor.fetchmany(size)
         else:
-            res = self.conn.fetchall()
+            res = self.cursor.fetchall()
         if res and isdict:
-            desc_info = self.conn.description
+            desc_info = self.cursor.description
             field_name = (x[0] for x in desc_info)
             for item in res:
                 ret.append(dict(zip(field_name, item)))
@@ -64,7 +65,7 @@ class DBSession(object):
         ret = None
 
         try:
-            self.conn.execute(sql, args)
+            self.cursor.execute(sql, args)
             affected_num = self.conn.rowcount
         except Exception as e:
             log.warn(traceback.format_exc())
@@ -87,6 +88,9 @@ class ModelMetaclass(type):
         mappings = {}
 
         tablename = attrs.get('__tablename__', name)
+        dbname = attrs.get('__dbname__')
+        if not dbname:
+            raise ValueError('not found __dbname__')
         log.info('model:{name}|table:{tablename}'.format(name=name, tablename=tablename))
 
         for k,v in attrs.items():
@@ -109,6 +113,7 @@ class ModelMetaclass(type):
         attrs['__mappings__'] = mappings
         attrs['__tablename__'] = tablename
         attrs['__dbsess__'] = None
+        attrs['__dbname__'] = dbname
         attrs['__primary_key__'] = primary_key
         attrs['__fields__'] = fields
         attrs['__select__'] = 'select `{primary_key}`, {fields} from `{tablename}`'.format(
@@ -135,12 +140,10 @@ class ModelMetaclass(type):
 class Model(dict, metaclass=ModelMetaclass):
     '''base model'''
 
-    def __init__(self, **kw):
+    def __init__(self, dbpool, **kw):
         super(Model, self).__init__(**kw)
-        self.dbsess = self.__dbsess__
-        for k,v in globals().items():
-            if isinstance(v, DBPool):
-                self.dbsess = v
+        self.dbsess = DBSession(dbpool, self.__dbname__)
+
 
     def load(self, **kw):
         pass
@@ -168,9 +171,9 @@ class Model(dict, metaclass=ModelMetaclass):
                 setattr(self, key, value)
         return value
 
-    @classmethod
-    def find_all(cls, where=None, args=None, **kw):
-        sql = [cls.__select__]
+    # @classmethod
+    def find_all(self, where=None, args=None, **kw):
+        sql = [self.__select__]
         order_by = kw.get('order_by', None)
         limit = kw.get('limit', None)
 

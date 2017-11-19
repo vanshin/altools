@@ -28,13 +28,14 @@ sql = init_kzsql(dbsconf)
 class User(Model):
     '''test user'''
     __tablename__ = 'auth_user'
+    __dbname__ = 'rd_user'
 
     id = IntegerField(primary_key=True)
     name = StringField()
     age = IntegerField()
     sex = IntegerField()
 
-us = User()
+us = User(sql)
 ret = us.find_all()
 print(ret)
 
