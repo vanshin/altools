@@ -8,7 +8,9 @@ log = logging.getLogger()
 from dbconn import DBPool, init_pool
 
 def init_kzsql(dbsconf):
-    if init_pool(dbsconf):
+    dbconns = init_pool(dbsconf)
+    if dbconns:
        log.info('init {}'.format(','.join([k for k in dbsconf])))
 
+    return dbconns
 

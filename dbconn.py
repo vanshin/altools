@@ -30,11 +30,14 @@ class DBPool(object):
         for k,v in dbconfs.items():
             max_size = v.get('max_size', 10)
             pool = Pool(max_size)
-            print(max_size)
             for i in range(max_size):
                 conn = DBConn(v)
                 pool.put(conn)
             __pool[k] = pool
+
+    def get(self, name):
+        global __pool
+        return __pool[name]
 
 
 class DBConnBase(object):
