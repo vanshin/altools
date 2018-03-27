@@ -33,7 +33,7 @@ def json_default_trans(obj):
 
 
 
-def output(code=0000, message='success', data=None):
+def output(code='0000', message='success', data=None):
     ret = {
         'code': code,
         'message': message,

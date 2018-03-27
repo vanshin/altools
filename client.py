@@ -3,7 +3,10 @@
 '''client'''
 
 import time
+import logging
 import requests
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger()
 
 class HttpClient(object):
     def __init__(self, server):
@@ -12,7 +15,9 @@ class HttpClient(object):
         self.server = 'http://{}:{}/'.format(self.address, self.port)
 
     def get(self, path, data={}):
-        ret = requests.get(self.server+path, data)
+        log.debug(self.server+path)
+        log.debug(data)
+        ret = requests.get(self.server+path, params=data)
         return ret.json()
 
     def post(self, path, data={}):
