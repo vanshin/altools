@@ -40,8 +40,8 @@ def output(code='0000', message='success', data=None):
         'data': {}
     }
     if not data:
-        return jsonify(ret)
+        return json.dumps(ret)
     ret['data'] = data
 
-    return jsonify(ret)
+    return json.dumps(ret)
 
