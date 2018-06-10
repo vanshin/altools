@@ -13,6 +13,7 @@ class RRET:
     RES_NOT_EXIST = 4043
     USER_NOT_SELF = 4044
     PARAM_ERROR = 5001
+    TOOLS_USE_ERROR = 7001
 
 
 MES = {
@@ -21,6 +22,7 @@ MES = {
     4042: 'USER_NOT_EXIST',
     4043: 'RES_NOT_EXIST',
     5001: 'PARAM_ERROR',
+    7001: 'TOOLS_USE_ERROR',
 }
 
 def json_default_trans(obj):

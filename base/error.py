@@ -12,6 +12,9 @@ class BaseException(Exception):
         self.message = message
         self.code = code
 
+class ToolExcp(BaseException):
+    def __init__(self, message='工具错误', code=RRET.TOOLS_USE_ERROR):
+        super(ParamExcp, self).__init__(message, code)
 
 class ParamExcp(BaseException):
     def __init__(self, message='参数错误', code=RRET.PARAM_ERROR):
