@@ -21,3 +21,20 @@ class User(AioModel):
     class Meta:
         database = db_basic
 
+    async def add_user(self, **kw):
+
+        args_idft = {
+            'int': ['type', 'status'],
+            'str': [
+                'username', 'email', 'mobile', 'password',
+                'login_ip',
+            ],
+            'datetime': ['create_time', 'update_time']
+        }
+
+        v = build_args(args_idft, kw)
+
+        await db_basic.connect()
+        await self.create()
+
+
