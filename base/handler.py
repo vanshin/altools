@@ -1,12 +1,37 @@
-'''基础处理封装'''
+'''basic api handler'''
+
+import traceback
 
 from quart import request
-from quart.views import MethodView
+from quart.views import MethodView, MethodViewType
 
-from .inspector import MisInspector
-from .excepts import ParamError, BaseError, ServerError
+from .builder.args_builder import ArgsBuilder
+from .excepts import ParamError, BaseError
+from .output import output
 
-class BaseView(MethodView):
+class CheckAllMeta(MethodViewType):
+
+    @staticmethod
+    def check(func):
+        async def _(self, *args, **kw):
+            try:
+                return await func(self, *args, **kw)
+            except BaseError as e:
+                print(traceback.format_exc())
+                return output(code=e.code, message=e.message)
+        return _
+
+    def __new__(cls, name, bases, attrs):
+
+        checked_funcs = ['get', 'post', 'put']
+
+        for k,v in attrs.items():
+            if k in checked_funcs:
+                attrs[k] = cls.check(v)
+        return type.__new__(cls, name, bases, attrs)
+
+
+class BaseView(MethodView, metaclass=CheckAllMeta):
 
     _dofors = ('all', 'existence', 'page')
     _dtype = ('form', 'json')
@@ -16,6 +41,15 @@ class BaseView(MethodView):
         self.args_idft= {}
         self.args_lang_map = {}
         self.required_args = set()
+        request_context = ['remote_addr', ]
+        for i in request_context:
+            v = getattr(request, i, None)
+            setattr(self, i, v)
+
+    # def __getattr__(self, name):
+        # if hasattr(request, name):
+            # return getattr(request, name)
+        # raise AttributeError
 
     async def source_by_dtype(self, dtype):
         '''获取初始数据'''
@@ -25,9 +59,10 @@ class BaseView(MethodView):
 
         self.source_data = {}
         if dtype == 'form':
-            self.source_data = request.args
+            self.source_data = request.args or await request.form
         elif dtype == 'json':
             self.source_data = await request.get_data
+        print(f'source data {self.source_data}')
 
     async def build_args(self, dtype='form', dofor='all'):
         '''验证参数

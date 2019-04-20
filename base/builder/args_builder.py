@@ -1,5 +1,8 @@
 '''参数建造者'''
 
+from ..inspector import MisInspector
+from ..excepts import ParamError, BaseError, ServerError
+
 class ArgsBuilder(object):
     '''用来识别，转化，控制参数'''
 
@@ -54,7 +57,7 @@ class ArgsBuilder(object):
                 # raise ParamError('内部错误')
             # setattr(self, key, kw[key])
 
-    async def _page_type_detection(self, arg_name):
+    def _page_type_detection(self, arg_name):
 
         # 自动添加时间的区间
         if arg_name.endswith('time'):

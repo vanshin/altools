@@ -1,5 +1,8 @@
+'''all database conns'''
 
-db_basic = AioMySQLDatabase('blog', user='op_blog', password='blog_126ac9f6')
+from aiopeewee import AioMySQLDatabase
+
+db_basic = AioMySQLDatabase('basic', user='op_basic', password='basic_f17aaabc')
 db_blog = AioMySQLDatabase('blog', user='op_blog', password='blog_126ac9f6')
 
 global conns
@@ -10,6 +13,3 @@ conns = {
 }
 
 
-def conn_(db_name):
-    def _
-    return _

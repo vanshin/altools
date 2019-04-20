@@ -1,29 +1,7 @@
-#coding=utf-8
+
 import json
 import datetime
-import config
 
-from flask import jsonify
-from flask import request
-
-class RRET:
-    SUCCESS = 2000
-    USER_NOT_LOGIN = 4041
-    USER_NOT_EXIST = 4042
-    RES_NOT_EXIST = 4043
-    USER_NOT_SELF = 4044
-    PARAM_ERROR = 5001
-    TOOLS_USE_ERROR = 7001
-
-
-MES = {
-    2000: 'SUCCESS',
-    4041: 'USER_NOT_LOGIN',
-    4042: 'USER_NOT_EXIST',
-    4043: 'RES_NOT_EXIST',
-    5001: 'PARAM_ERROR',
-    7001: 'TOOLS_USE_ERROR',
-}
 
 def json_default_trans(obj):
     '''json对处理不了的格式的处理方法'''
@@ -35,15 +13,13 @@ def json_default_trans(obj):
 
 
 
-def output(code='0000', message='success', data=None):
+def output(data=None, code='2000', message='SUCCESS'):
+
     ret = {
         'code': code,
         'message': message,
-        'data': {}
+        'data': '' if data is None else data
     }
-    if not data:
-        return json.dumps(ret)
-    ret['data'] = data
 
-    return json.dumps(ret)
+    return json.dumps(ret, default=json_default_trans)
 
