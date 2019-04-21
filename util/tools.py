@@ -1,13 +1,19 @@
-#coding=utf8
+'''tools set'''
 
-'''工具类'''
+import random
+import string
 
 from .runtime import hids
 from .valid import is_valid_int
 from ..base.error import ToolExcp
 
-def hash_text(content, key='vanshinisyourfather'):
-    pass
+def random_str(length=4):
+
+    a = []
+
+    for i in range(length):
+        a.append(random.choice(string.ascii_lowercase))
+    return ''.join(a)
 
 def encode_id(t):
     if not is_valid_int(t):

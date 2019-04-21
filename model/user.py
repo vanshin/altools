@@ -3,7 +3,7 @@ import inspect
 import functools
 import collections
 
-from ..base.excepts import ServerError
+from .excepts import ServerError
 
 from aiopeewee import AioModel
 
@@ -111,4 +111,6 @@ class User(AioModel):
             raise ServerError(e.args[1])
 
         return row
+
+    def
 
